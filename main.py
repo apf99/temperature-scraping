@@ -1,7 +1,9 @@
 import requests
 import selectorlib
 from datetime import datetime
-
+import streamlit as st
+import pandas as pd
+import plotly.express as px
 
 URL = 'https://programmer100.pythonanywhere.com/'
 
@@ -19,21 +21,29 @@ def extract(source):
 
 
 def store(extracted):
-    with open('data.txt', 'a') as file:
+    with open('data.csv', 'a') as file:
         file.write(extracted + '\n')
 
 
 def get_data():
         scraped = scrape(URL)
         extracted = extract(scraped)
-        print(extracted)
-        # content = read(extracted)
-        # if extracted != 'No upcoming tours':
-        #     if not extracted in content:
-        #         store(extracted)
+        now = datetime.now()
+        result = f'{now.strftime('%y-%m-%d-%H-%M-%S')},{extracted}'
+        print(result)
+        store(result)
 
 
-if __name__ == '__main__':
+st.title('Temperature Data')
+#get the data
+button = st.button('Get Data')
+if button:
     get_data()
 
+df = pd.read_csv('data.csv')
+temperatures = df.temperatures
+dates = df.dates
+labels = {'x': 'Dates', 'y': 'Temperature (C)'}
+figure = px.line(x=dates, y=temperatures, labels=labels)
+st.plotly_chart(figure)
 
